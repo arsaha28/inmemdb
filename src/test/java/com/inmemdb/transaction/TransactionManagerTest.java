@@ -44,8 +44,8 @@ public class TransactionManagerTest {
     @DisplayName("Should commit transaction successfully")
     public void testCommitTransaction() throws TransactionException {
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", "value1");
-        tx.put("key2", "value2");
+        tx.getStore().put("key1", "value1");
+        tx.getStore().put("key2", "value2");
 
         tx.commit();
 
@@ -58,8 +58,8 @@ public class TransactionManagerTest {
     @DisplayName("Should rollback transaction")
     public void testRollbackTransaction() {
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", "value1");
-        tx.put("key2", "value2");
+        tx.getStore().put("key1", "value1");
+        tx.getStore().put("key2", "value2");
 
         tx.rollback();
 
@@ -74,13 +74,13 @@ public class TransactionManagerTest {
         store.put("key1", "original");
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", "modified");
+        tx.getStore().put("key1", "modified");
 
         // Store should still have original value
         assertEquals("original", store.get("key1").orElse(null));
 
         // Transaction should see modified value
-        assertEquals("modified", tx.get("key1").orElse(null));
+        assertEquals("modified", tx.getStore().get("key1").orElse(null));
     }
 
     @Test
@@ -89,13 +89,13 @@ public class TransactionManagerTest {
         store.put("key1", "value1");
 
         Transaction tx = txManager.beginTransaction();
-        tx.delete("key1");
+        tx.getStore().delete("key1");
 
         // Store should still have the value before commit
         assertTrue(store.containsKey("key1"));
 
         // Transaction should not see the deleted key
-        assertFalse(tx.get("key1").isPresent());
+        assertFalse(tx.getStore().get("key1").isPresent());
 
         tx.commit();
 
@@ -107,8 +107,8 @@ public class TransactionManagerTest {
     @DisplayName("Should execute transaction with automatic commit")
     public void testExecuteTransaction() throws TransactionException {
         String result = txManager.executeTransaction(tx -> {
-            tx.put("key1", "value1");
-            tx.put("key2", "value2");
+            tx.getStore().put("key1", "value1");
+            tx.getStore().put("key2", "value2");
             return "success";
         });
 
@@ -122,7 +122,7 @@ public class TransactionManagerTest {
     public void testExecuteTransactionWithException() {
         assertThrows(TransactionException.class, () -> {
             txManager.executeTransaction(tx -> {
-                tx.put("key1", "value1");
+                tx.getStore().put("key1", "value1");
                 throw new RuntimeException("Test exception");
             });
         });
@@ -135,8 +135,8 @@ public class TransactionManagerTest {
     @DisplayName("Should execute void transaction")
     public void testExecuteVoidTransaction() throws TransactionException {
         txManager.executeTransaction((TransactionManager.VoidTransactionOperation) tx -> {
-            tx.put("key1", "value1");
-            tx.put("key2", "value2");
+            tx.getStore().put("key1", "value1");
+            tx.getStore().put("key2", "value2");
         });
 
         assertEquals("value1", store.get("key1").orElse(null));
@@ -159,24 +159,24 @@ public class TransactionManagerTest {
     @DisplayName("Should not allow operations on committed transaction")
     public void testOperationsAfterCommit() throws TransactionException {
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", "value1");
+        tx.getStore().put("key1", "value1");
         tx.commit();
 
-        assertThrows(IllegalStateException.class, () -> tx.put("key2", "value2"));
-        assertThrows(IllegalStateException.class, () -> tx.get("key2"));
-        assertThrows(IllegalStateException.class, () -> tx.delete("key2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().put("key2", "value2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().get("key2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().delete("key2"));
     }
 
     @Test
     @DisplayName("Should not allow operations on rolled back transaction")
     public void testOperationsAfterRollback() {
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", "value1");
+        tx.getStore().put("key1", "value1");
         tx.rollback();
 
-        assertThrows(IllegalStateException.class, () -> tx.put("key2", "value2"));
-        assertThrows(IllegalStateException.class, () -> tx.get("key2"));
-        assertThrows(IllegalStateException.class, () -> tx.delete("key2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().put("key2", "value2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().get("key2"));
+        assertThrows(IllegalStateException.class, () -> tx.getStore().delete("key2"));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class TransactionManagerTest {
             executor.submit(() -> {
                 try {
                     txManager.executeTransaction((TransactionManager.VoidTransactionOperation) tx -> {
-                        tx.put("key" + threadNum, "value" + threadNum);
+                        tx.getStore().put("key" + threadNum, "value" + threadNum);
                     });
                     successCount.incrementAndGet();
                 } catch (TransactionException e) {

@@ -43,15 +43,15 @@
  *
  * // Automatic transaction management
  * db.executeTransaction(tx -> {
- *     tx.put("key1", value1);
- *     tx.put("key2", value2);
+ *     tx.getStore().put("key1", value1);
+ *     tx.getStore().put("key2", value2);
  *     // Automatically commits on success, rollbacks on exception
  * });
  *
  * // Manual transaction control
  * Transaction tx = db.beginTransaction();
  * try {
- *     tx.put("key", value);
+ *     tx.getStore().put("key", value);
  *     tx.commit();
  * } catch (Exception e) {
  *     tx.rollback();

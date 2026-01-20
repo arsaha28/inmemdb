@@ -74,7 +74,7 @@ public class TransactionIsolationTest {
         data.addItem("item1");
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("data", data);
+        tx.getStore().put("data", data);
 
         // Modify the original object after putting it in transaction
         data.setName("modified");
@@ -82,7 +82,7 @@ public class TransactionIsolationTest {
         data.addItem("item2");
 
         // Transaction should still have the original values (deep copy)
-        MutableData txData = (MutableData) tx.get("data").orElseThrow();
+        MutableData txData = (MutableData) tx.getStore().get("data").orElseThrow();
         assertEquals("original", txData.getName());
         assertEquals(100, txData.getValue());
         assertEquals(1, txData.getItems().size());
@@ -97,17 +97,17 @@ public class TransactionIsolationTest {
         MutableData original = new MutableData("data", 50);
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("data", original);
+        tx.getStore().put("data", original);
 
         // Get the object from transaction
-        MutableData retrieved = (MutableData) tx.get("data").orElseThrow();
+        MutableData retrieved = (MutableData) tx.getStore().get("data").orElseThrow();
 
         // Modify the retrieved object
         retrieved.setName("modified_retrieved");
         retrieved.setValue(999);
 
         // Get again from transaction - should not reflect the modification
-        MutableData retrievedAgain = (MutableData) tx.get("data").orElseThrow();
+        MutableData retrievedAgain = (MutableData) tx.getStore().get("data").orElseThrow();
         assertEquals("data", retrievedAgain.getName());
         assertEquals(50, retrievedAgain.getValue());
 
@@ -120,7 +120,7 @@ public class TransactionIsolationTest {
         MutableData data = new MutableData("txData", 300);
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", data);
+        tx.getStore().put("key1", data);
 
         // Store should not have the data before commit
         assertFalse(store.containsKey("key1"));
@@ -137,7 +137,7 @@ public class TransactionIsolationTest {
         data.addItem("A");
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("key1", data);
+        tx.getStore().put("key1", data);
         tx.commit();
 
         // After commit, modify the original object
@@ -162,7 +162,7 @@ public class TransactionIsolationTest {
 
         // Start transaction and read the data
         Transaction tx = txManager.beginTransaction();
-        MutableData txData = (MutableData) tx.get("shared").orElseThrow();
+        MutableData txData = (MutableData) tx.getStore().get("shared").orElseThrow();
 
         assertEquals("inStore", txData.getName());
         assertEquals(100, txData.getValue());
@@ -173,7 +173,7 @@ public class TransactionIsolationTest {
         originalRef.setValue(200);
 
         // Transaction should still see original values (it read a copy)
-        MutableData txDataAgain = (MutableData) tx.get("shared").orElseThrow();
+        MutableData txDataAgain = (MutableData) tx.getStore().get("shared").orElseThrow();
         assertEquals("inStore", txDataAgain.getName());
         assertEquals(100, txDataAgain.getValue());
 
@@ -188,14 +188,14 @@ public class TransactionIsolationTest {
         data.addItem("child2");
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("data", data);
+        tx.getStore().put("data", data);
 
         // Modify nested collection in original
         data.getItems().clear();
         data.addItem("different");
 
         // Transaction should have original nested data
-        MutableData txData = (MutableData) tx.get("data").orElseThrow();
+        MutableData txData = (MutableData) tx.getStore().get("data").orElseThrow();
         assertEquals(2, txData.getItems().size());
         assertEquals("child1", txData.getItems().get(0));
         assertEquals("child2", txData.getItems().get(1));
@@ -214,20 +214,20 @@ public class TransactionIsolationTest {
         Transaction tx2 = txManager.beginTransaction();
 
         // Both read the same key
-        MutableData tx1Data = (MutableData) tx1.get("counter").orElseThrow();
-        MutableData tx2Data = (MutableData) tx2.get("counter").orElseThrow();
+        MutableData tx1Data = (MutableData) tx1.getStore().get("counter").orElseThrow();
+        MutableData tx2Data = (MutableData) tx2.getStore().get("counter").orElseThrow();
 
         // Modify in tx1
         tx1Data.setValue(100);
-        tx1.put("counter", tx1Data);
+        tx1.getStore().put("counter", tx1Data);
 
         // Modify in tx2 (should be independent)
         tx2Data.setValue(200);
-        tx2.put("counter", tx2Data);
+        tx2.getStore().put("counter", tx2Data);
 
         // Each transaction should see its own modifications
-        assertEquals(100, ((MutableData) tx1.get("counter").orElseThrow()).getValue());
-        assertEquals(200, ((MutableData) tx2.get("counter").orElseThrow()).getValue());
+        assertEquals(100, ((MutableData) tx1.getStore().get("counter").orElseThrow()).getValue());
+        assertEquals(200, ((MutableData) tx2.getStore().get("counter").orElseThrow()).getValue());
 
         // Commit tx1
         tx1.commit();
@@ -250,7 +250,7 @@ public class TransactionIsolationTest {
 
         // Should throw IllegalArgumentException when trying to store non-serializable
         assertThrows(IllegalArgumentException.class, () -> {
-            tx.put("key", nonSerializable);
+            tx.getStore().put("key", nonSerializable);
         });
     }
 
@@ -262,12 +262,12 @@ public class TransactionIsolationTest {
         Integer intValue = 42;
 
         Transaction tx = txManager.beginTransaction();
-        tx.put("str", strValue);
-        tx.put("int", intValue);
+        tx.getStore().put("str", strValue);
+        tx.getStore().put("int", intValue);
 
         // Should work fine with immutable types
-        assertEquals(strValue, tx.get("str").orElseThrow());
-        assertEquals(intValue, tx.get("int").orElseThrow());
+        assertEquals(strValue, tx.getStore().get("str").orElseThrow());
+        assertEquals(intValue, tx.getStore().get("int").orElseThrow());
 
         tx.commit();
 

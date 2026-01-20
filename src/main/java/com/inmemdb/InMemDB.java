@@ -149,8 +149,8 @@ public class InMemDB {
         logger.info("--- Transaction Demo ---");
         try {
             executeTransaction(tx -> {
-                tx.put("account1", 1000);
-                tx.put("account2", 500);
+                tx.getStore().put("account1", 1000);
+                tx.getStore().put("account2", 500);
                 logger.info("Transaction: Created accounts");
             });
             logger.info("Account1 balance: {}", get("account1").orElse(0));
@@ -159,8 +159,8 @@ public class InMemDB {
             // Transaction with rollback on error
             try {
                 executeTransaction(tx -> {
-                    tx.put("account1", 900);
-                    tx.put("account2", 600);
+                    tx.getStore().put("account1", 900);
+                    tx.getStore().put("account2", 600);
                     throw new RuntimeException("Simulated error");
                 });
             } catch (TransactionException e) {

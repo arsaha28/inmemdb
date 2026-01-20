@@ -1,10 +1,10 @@
 package com.inmemdb.transaction;
 
-import java.util.Optional;
+import com.inmemdb.storage.KeyValueStore;
 
 /**
  * Interface representing a database transaction
- * Provides isolation and atomicity for operations
+ * Manages transaction lifecycle - data operations performed through getStore()
  */
 public interface Transaction {
 
@@ -21,24 +21,11 @@ public interface Transaction {
     TransactionStatus getStatus();
 
     /**
-     * Put a value in the transaction context
-     * @param key the key
-     * @param value the value
+     * Get a transactional view of the store
+     * All operations on this store are part of the transaction
+     * @return transactional KeyValueStore instance
      */
-    void put(String key, Object value);
-
-    /**
-     * Get a value from the transaction context
-     * @param key the key
-     * @return the value if present
-     */
-    Optional<Object> get(String key);
-
-    /**
-     * Delete a value in the transaction context
-     * @param key the key
-     */
-    void delete(String key);
+    KeyValueStore<String, Object> getStore();
 
     /**
      * Commit the transaction
