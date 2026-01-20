@@ -75,4 +75,33 @@ public interface KeyValueStore<K, V> {
      * @return a map of all key-value pairs
      */
     Map<K, V> getAll();
+
+    /**
+     * Atomically replace the value for a key only if currently mapped to a given value
+     * @param key the key
+     * @param oldValue the expected current value
+     * @param newValue the new value
+     * @return true if the value was replaced
+     */
+    boolean compareAndSwap(K key, V oldValue, V newValue);
+
+    /**
+     * Atomically increment a numeric value
+     * Only works if the value is a Number type
+     * @param key the key
+     * @param delta the amount to increment by
+     * @return the new value after increment
+     * @throws IllegalArgumentException if value is not a Number
+     */
+    Number incrementAndGet(K key, long delta);
+
+    /**
+     * Atomically decrement a numeric value
+     * Only works if the value is a Number type
+     * @param key the key
+     * @param delta the amount to decrement by
+     * @return the new value after decrement
+     * @throws IllegalArgumentException if value is not a Number
+     */
+    Number decrementAndGet(K key, long delta);
 }

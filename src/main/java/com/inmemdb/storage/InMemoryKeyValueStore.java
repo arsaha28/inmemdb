@@ -139,4 +139,57 @@ public class InMemoryKeyValueStore<K, V> implements KeyValueStore<K, V> {
         logger.debug("PutIfAbsent key: {}, value: {}, previous: {}", key, value, previousValue);
         return previousValue;
     }
+
+    @Override
+    public boolean compareAndSwap(K key, V oldValue, V newValue) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+        if (newValue == null) {
+            throw new IllegalArgumentException("New value cannot be null");
+        }
+
+        boolean success = store.replace(key, oldValue, newValue);
+        logger.debug("CompareAndSwap key: {}, oldValue: {}, newValue: {}, success: {}",
+                key, oldValue, newValue, success);
+        return success;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Number incrementAndGet(K key, long delta) {
+        if (key == null) {
+            throw new IllegalArgumentException("Key cannot be null");
+        }
+
+        Number result = store.compute(key, (k, v) -> {
+            if (v == null) {
+                return (V) Long.valueOf(delta);
+            }
+            if (!(v instanceof Number)) {
+                throw new IllegalArgumentException("Value is not a Number: " + v.getClass());
+            }
+
+            Number num = (Number) v;
+            if (num instanceof Integer) {
+                return (V) Integer.valueOf(num.intValue() + (int) delta);
+            } else if (num instanceof Long) {
+                return (V) Long.valueOf(num.longValue() + delta);
+            } else if (num instanceof Double) {
+                return (V) Double.valueOf(num.doubleValue() + delta);
+            } else if (num instanceof Float) {
+                return (V) Float.valueOf(num.floatValue() + delta);
+            } else {
+                return (V) Long.valueOf(num.longValue() + delta);
+            }
+        });
+
+        logger.debug("IncrementAndGet key: {}, delta: {}, result: {}", key, delta, result);
+        return result;
+    }
+
+    @Override
+    public Number decrementAndGet(K key, long delta) {
+        return incrementAndGet(key, -delta);
+    }
 }
