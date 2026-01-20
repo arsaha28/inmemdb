@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Implementation of Transaction with MVCC-like isolation
  * Maintains a local workspace for changes until commit
+ * Uses deep copying to ensure complete isolation from storage layer
  */
 class TransactionImpl implements Transaction {
     private static final Logger logger = LoggerFactory.getLogger(TransactionImpl.class);
@@ -26,7 +27,7 @@ class TransactionImpl implements Transaction {
         this.workspace = new ConcurrentHashMap<>();
         this.deletedKeys = ConcurrentHashMap.newKeySet();
         this.status = TransactionStatus.ACTIVE;
-        logger.debug("Transaction {} created", id);
+        logger.debug("Transaction {} created with isolated workspace", id);
     }
 
     @Override
@@ -42,9 +43,11 @@ class TransactionImpl implements Transaction {
     @Override
     public void put(String key, Object value) {
         ensureActive();
-        workspace.put(key, value);
+        // Deep copy the value to ensure isolation from external modifications
+        Object copiedValue = ValueCopier.deepCopy(value);
+        workspace.put(key, copiedValue);
         deletedKeys.remove(key);
-        logger.debug("Transaction {}: put key={}", id, key);
+        logger.debug("Transaction {}: put key={} (deep copied)", id, key);
     }
 
     @Override
@@ -56,13 +59,15 @@ class TransactionImpl implements Transaction {
             return Optional.empty();
         }
 
-        // Check workspace first
+        // Check workspace first (return a copy to prevent external modifications)
         if (workspace.containsKey(key)) {
-            return Optional.ofNullable(workspace.get(key));
+            Object value = workspace.get(key);
+            return Optional.ofNullable(ValueCopier.deepCopy(value));
         }
 
-        // Read from store
-        return store.get(key);
+        // Read from store (copy to ensure transaction isolation)
+        Optional<Object> storeValue = store.get(key);
+        return storeValue.map(ValueCopier::deepCopy);
     }
 
     @Override
@@ -86,7 +91,7 @@ class TransactionImpl implements Transaction {
                 store.delete(key);
             }
 
-            // Apply updates/inserts
+            // Apply updates/inserts (workspace contains deep copies, safe to commit)
             for (Map.Entry<String, Object> entry : workspace.entrySet()) {
                 store.put(entry.getKey(), entry.getValue());
             }
