@@ -1,10 +1,10 @@
-# CCAgent
+# InMemDB
 
-Claude Code Agent - An AI-powered coding assistant
+In-Memory Database - A lightweight in-memory database implementation
 
 ## Overview
 
-CCAgent is a Java-based project designed to provide AI-powered assistance for coding tasks.
+InMemDB is a Java-based in-memory database project designed for fast data storage and retrieval.
 
 ## Getting Started
 
@@ -26,13 +26,13 @@ mvn clean install
 Execute the application:
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.ccagent.CCAgent"
+mvn exec:java -Dexec.mainClass="com.inmemdb.InMemDB"
 ```
 
 Or run the compiled JAR:
 
 ```bash
-java -jar target/ccagent-0.1.0.jar
+java -jar target/inmemdb-0.1.0.jar
 ```
 
 ### Test
@@ -46,15 +46,15 @@ mvn test
 ## Project Structure
 
 ```
-ccagent/
+inmemdb/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── com/ccagent/    # Java source files
+│   │   │   └── com/inmemdb/    # Java source files
 │   │   └── resources/           # Application resources
 │   └── test/
 │       ├── java/
-│       │   └── com/ccagent/    # Test files
+│       │   └── com/inmemdb/    # Test files
 │       └── resources/           # Test resources
 ├── target/                      # Build output
 └── pom.xml                      # Maven configuration

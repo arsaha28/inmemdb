@@ -5,13 +5,13 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ccagent</groupId>
-    <artifactId>ccagent</artifactId>
+    <groupId>com.inmemdb</groupId>
+    <artifactId>inmemdb</artifactId>
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>CCAgent</name>
-    <description>Claude Code Agent - An AI-powered coding assistant</description>
+    <name>InMemDB</name>
+    <description>In-Memory Database - A lightweight in-memory database implementation</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -76,7 +76,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.ccagent.CCAgent</mainClass>
+                            <mainClass>com.inmemdb.InMemDB</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
