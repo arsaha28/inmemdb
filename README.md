@@ -4,50 +4,70 @@ Claude Code Agent - An AI-powered coding assistant
 
 ## Overview
 
-CCAgent is a TypeScript-based project designed to provide AI-powered assistance for coding tasks.
+CCAgent is a Java-based project designed to provide AI-powered assistance for coding tasks.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js >= 18.0.0
-- npm or yarn
-
-### Installation
-
-```bash
-npm install
-```
+- Java 17 or higher
+- Maven 3.6 or higher
 
 ### Build
 
+Build the project using Maven:
+
 ```bash
-npm run build
+mvn clean install
 ```
 
-### Development
+### Run
+
+Execute the application:
 
 ```bash
-npm run dev
+mvn exec:java -Dexec.mainClass="com.ccagent.CCAgent"
+```
+
+Or run the compiled JAR:
+
+```bash
+java -jar target/ccagent-0.1.0.jar
+```
+
+### Test
+
+Run the test suite:
+
+```bash
+mvn test
 ```
 
 ## Project Structure
 
 ```
 ccagent/
-├── src/           # Source files
-├── tests/         # Test files
-├── dist/          # Build output
-└── package.json   # Project configuration
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/ccagent/    # Java source files
+│   │   └── resources/           # Application resources
+│   └── test/
+│       ├── java/
+│       │   └── com/ccagent/    # Test files
+│       └── resources/           # Test resources
+├── target/                      # Build output
+└── pom.xml                      # Maven configuration
 ```
 
-## Scripts
+## Maven Commands
 
-- `npm run build` - Build the project
-- `npm run dev` - Watch mode for development
-- `npm run test` - Run tests
-- `npm run lint` - Lint source files
-- `npm run format` - Format source files
+- `mvn clean` - Clean the project
+- `mvn compile` - Compile the source code
+- `mvn test` - Run unit tests
+- `mvn package` - Package the application as a JAR
+- `mvn install` - Install the package into local repository
+- `mvn clean install` - Clean and build the project
 
 ## License
 
